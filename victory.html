@@ -230,14 +230,6 @@
         createFloatingHearts();
         createConfetti();
 
-        // Try to play music (may need user interaction on some browsers)
-        const music = document.getElementById('victoryMusic');
-        music.play().catch(e => {
-            // If autoplay fails, play on first click
-            document.body.addEventListener('click', () => {
-                music.play();
-            }, { once: true });
-        });
     </script>
 </body>
 </html>
