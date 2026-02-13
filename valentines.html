@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Maze Adventure 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffb6c1, #ffc0cb, #ffe4e9);
+            font-family: 'Georgia', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            animation: float-up 8s ease-in-out infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float-up {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+            text-align: center;
+            max-width: 95vw;
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #ff1493;
+            text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ff69b4;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .level-indicator {
+            font-size: 1.3rem;
+            color: #ff1493;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: linear-gradient(45deg, #ffb6c1, #ffc0cb);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: #ff1493;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.4);
+        }
+
+        .game-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        #gameCanvas {
+            border: 4px solid #ff69b4;
+            border-radius: 15px;
+            background: #fff5f7;
+            box-shadow: inset 0 0 30px rgba(255, 182, 193, 0.3);
+        }
+
+        .decorative-images {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .deco-img {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #ff69b4;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+            object-fit: cover;
+        }
+
+        .deco-img.top-left { top: -60px; left: -60px; width: 80px; height: 80px; }
+        .deco-img.top-right { top: -60px; right: -60px; width: 70px; height: 70px; }
+        .deco-img.bottom-left { bottom: -60px; left: -60px; width: 75px; height: 75px; }
+        .deco-img.bottom-right { bottom: -60px; right: -60px; width: 85px; height: 85px; }
+        .deco-img.center-bottom { bottom: -80px; left: 50%; transform: translateX(-50%); width: 100px; height: 100px; }
+
+        .cute-gif {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+        }
+        .cute-gif.left { top: 50%; left: -80px; transform: translateY(-50%); }
+        .cute-gif.right { top: 50%; right: -80px; transform: translateY(-50%); }
+
+        .controls-hint {
+            margin-top: 20px;
+            color: #ff69b4;
+            font-size: 1rem;
+        }
+
+        .mobile-controls {
+            display: none;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 56px;
+            height: 56px;
+            border: 2px solid #e08aa8;
+            border-radius: 14px;
+            background: #f0b8c8;
+            color: #b85c7a;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(180, 100, 120, 0.2);
+            transition: transform 0.1s, background 0.15s;
+        }
+
+        .control-btn:hover {
+            background: #e8a8b8;
+        }
+
+        .control-btn:active {
+            transform: scale(0.96);
+            background: #e098b0;
+        }
+
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 56px);
+            grid-template-rows: repeat(3, 56px);
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .d-pad .control-btn:nth-child(1) { grid-column: 2; grid-row: 1; }
+        .d-pad .control-btn:nth-child(2) { grid-column: 1; grid-row: 2; }
+        .d-pad .control-btn:nth-child(3) { grid-column: 3; grid-row: 2; }
+        .d-pad .control-btn:nth-child(4) { grid-column: 2; grid-row: 3; }
+
+        @media (max-width: 768px) {
+            .mobile-controls { display: block; }
+            .controls-hint { display: none; }
+            .deco-img, .cute-gif { display: none; }
+            .game-container { padding: 20px 15px; }
+            .title { font-size: 1.8rem; }
+        }
+
+        /* Start Screen */
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-btn {
+            background: #e891a8;
+            color: #fff;
+            border: 2px solid #d97a94;
+            padding: 18px 44px;
+            font-size: 1.35rem;
+            border-radius: 26px;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(200, 100, 130, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s;
+            margin-top: 20px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        .start-btn:hover {
+            background: #e07d98;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200, 100, 130, 0.35);
+        }
+
+        .start-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #ff69b4;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+            margin: 20px 0;
+        }
+
+        .level-transition {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .level-transition h2 {
+            font-size: 2.5rem;
+            color: #ff1493;
+            margin-bottom: 20px;
+        }
+
+        .level-transition p {
+            color: #ff69b4;
+            font-size: 1.2rem;
+        }
+
+        .peach-cats {
+            width: 150px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-bg" id="heartsBg"></div>
+
+    <div class="game-container">
+        <!-- Start Screen -->
+        <div class="start-screen" id="startScreen">
+            <h1 class="title">Valentine's Maze Adventure 💕</h1>
+            <p class="subtitle">Help Lori collect all the hearts!</p>
+            <img src="IMG_3200.JPEG" alt="Lori" class="start-image">
+            <img src="peach-cat-cats.gif" alt="Peach Cats" class="peach-cats">
+            <p style="color: #ff69b4; margin: 15px 0;">Navigate through 3 magical mazes<br>and collect hearts to unlock a special surprise!</p>
+            <button class="start-btn" onclick="startGame()">Start Adventure 💖</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" style="display: none;">
+            <h1 class="title">Valentine's Maze 💕</h1>
+            <p class="level-indicator" id="levelIndicator">Level 1: Easy 🌸</p>
+            <div class="stats-bar">
+                <div class="stat">💖 Hearts: <span id="heartsCollected">0</span>/<span id="totalHearts">0</span></div>
+                <div class="stat">⏱️ Time: <span id="timer">0</span>s</div>
+            </div>
+            <div class="game-wrapper">
+                <img src="IMG_1611.jpg" alt="Couple" class="deco-img top-left">
+                <img src="IMG_2747.JPEG" alt="Lori" class="deco-img top-right">
+                <img src="IMG_6665.JPEG" alt="Lori" class="deco-img bottom-left">
+                <img src="IMG_1611.jpg" alt="Couple" class="deco-img bottom-right">
+                <img src="IMG_1638.jpg" alt="Best Couple Photo" class="deco-img center-bottom">
+                <img src="peach-cat-cats.gif" alt="Peach Cats" class="cute-gif left">
+                <img src="c5b84896be3f2686c01d9eeb86d27658.gif" alt="Cute Cats" class="cute-gif right">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+            <p class="controls-hint">Use Arrow Keys or WASD to move 💕</p>
+            <div class="mobile-controls">
+                <div class="d-pad">
+                    <button class="control-btn" onclick="movePlayer(0, -1)">↑</button>
+                    <button class="control-btn" onclick="movePlayer(-1, 0)">←</button>
+                    <button class="control-btn" onclick="movePlayer(1, 0)">→</button>
+                    <button class="control-btn" onclick="movePlayer(0, 1)">↓</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Transition -->
+        <div class="level-transition" id="levelTransition">
+            <h2 id="transitionTitle">Level Complete! 🎉</h2>
+            <img src="c5b84896be3f2686c01d9eeb86d27658.gif" alt="Cute Cats" class="peach-cats">
+            <p id="transitionText">Get ready for the next challenge!</p>
+            <button class="start-btn" onclick="nextLevel()">Continue 💕</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Game Configuration
+        const CELL_SIZE = 40;
+        const levels = [
+            { // Level 1 - Easy (small, simple)
+                name: "Easy 🌸",
+                width: 11,
+                height: 9,
+                hearts: 3,
+                maze: null
+            },
+            { // Level 2 - Medium
+                name: "Medium 🌺",
+                width: 15,
+                height: 11,
+                hearts: 5,
+                maze: null
+            },
+            { // Level 3 - Hard
+                name: "Hard 💖",
+                width: 19,
+                height: 13,
+                hearts: 7,
+                maze: null
+            }
+        ];
+
+        let currentLevel = 0;
+        let player = { x: 1, y: 1 };
+        let hearts = [];
+        let heartsCollected = 0;
+        let totalHeartsCollected = 0;
+        let maze = [];
+        let gameTimer = 0;
+        let timerInterval = null;
+        let playerImg = new Image();
+        let gameActive = false;
+
+        playerImg.src = 'IMG_3200.JPEG';
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Generate floating hearts background
+        function createFloatingHearts() {
+            const container = document.getElementById('heartsBg');
+            const heartEmojis = ['💕', '💖', '💗', '💝', '💘', '🌸', '✨'];
+            for (let i = 0; i < 30; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.textContent = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 8 + 's';
+                heart.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                container.appendChild(heart);
+            }
+        }
+
+        // Maze Generation using recursive backtracking
+        function generateMaze(width, height) {
+            // Initialize maze with walls
+            const maze = [];
+            for (let y = 0; y < height; y++) {
+                maze[y] = [];
+                for (let x = 0; x < width; x++) {
+                    maze[y][x] = 1; // 1 = wall
+                }
+            }
+
+            // Recursive backtracking
+            function carve(x, y) {
+                maze[y][x] = 0; // 0 = path
+                const directions = [[0, -2], [2, 0], [0, 2], [-2, 0]];
+                shuffleArray(directions);
+
+                for (const [dx, dy] of directions) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx > 0 && nx < width - 1 && ny > 0 && ny < height - 1 && maze[ny][nx] === 1) {
+                        maze[y + dy/2][x + dx/2] = 0; // Remove wall between
+                        carve(nx, ny);
+                    }
+                }
+            }
+
+            carve(1, 1);
+            
+            // Ensure start and end are open
+            maze[1][1] = 0;
+            maze[height - 2][width - 2] = 0;
+            
+            // Add some extra paths for easier navigation (especially on easy levels)
+            const extraPaths = Math.floor((width * height) / 20);
+            for (let i = 0; i < extraPaths; i++) {
+                const x = Math.floor(Math.random() * (width - 2)) + 1;
+                const y = Math.floor(Math.random() * (height - 2)) + 1;
+                if (x % 2 === 1 && y % 2 === 1) {
+                    maze[y][x] = 0;
+                }
+            }
+
+            return maze;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Place hearts on valid path cells
+        function placeHearts(maze, count) {
+            const hearts = [];
+            const validCells = [];
+            
+            for (let y = 1; y < maze.length - 1; y++) {
+                for (let x = 1; x < maze[0].length - 1; x++) {
+                    if (maze[y][x] === 0 && !(x === 1 && y === 1)) {
+                        validCells.push({ x, y });
+                    }
+                }
+            }
+
+            shuffleArray(validCells);
+            for (let i = 0; i < Math.min(count, validCells.length); i++) {
+                hearts.push(validCells[i]);
+            }
+
+            return hearts;
+        }
+
+        // Initialize level
+        function initLevel() {
+            const level = levels[currentLevel];
+            canvas.width = level.width * CELL_SIZE;
+            canvas.height = level.height * CELL_SIZE;
+            
+            maze = generateMaze(level.width, level.height);
+            player = { x: 1, y: 1 };
+            hearts = placeHearts(maze, level.hearts);
+            heartsCollected = 0;
+            
+            document.getElementById('levelIndicator').textContent = `Level ${currentLevel + 1}: ${level.name}`;
+            document.getElementById('heartsCollected').textContent = heartsCollected;
+            document.getElementById('totalHearts').textContent = hearts.length;
+            
+            draw();
+        }
+
+        // Draw the game
+        function draw() {
+            const level = levels[currentLevel];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw maze
+            for (let y = 0; y < level.height; y++) {
+                for (let x = 0; x < level.width; x++) {
+                    if (maze[y][x] === 1) {
+                        // Wall - gradient pink
+                        const gradient = ctx.createLinearGradient(
+                            x * CELL_SIZE, y * CELL_SIZE,
+                            (x + 1) * CELL_SIZE, (y + 1) * CELL_SIZE
+                        );
+                        gradient.addColorStop(0, '#ff69b4');
+                        gradient.addColorStop(1, '#ff1493');
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        
+                        // Add subtle border
+                        ctx.strokeStyle = '#ff85c1';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    } else {
+                        // Path - light pink
+                        ctx.fillStyle = '#fff5f7';
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            // Draw exit indicator
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.4)';
+            ctx.fillRect((level.width - 2) * CELL_SIZE, (level.height - 2) * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            // Draw a cute exit with centered emoji
+            ctx.font = '28px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🚪', (level.width - 2) * CELL_SIZE + CELL_SIZE / 2, (level.height - 2) * CELL_SIZE + CELL_SIZE / 2);
+
+            // Draw hearts
+            ctx.font = '28px Arial';
+            for (const heart of hearts) {
+                ctx.fillText('💖', heart.x * CELL_SIZE + CELL_SIZE / 2, heart.y * CELL_SIZE + CELL_SIZE / 2);
+            }
+            
+            // Reset text alignment for other drawing
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+
+            // Draw player (Lori's image)
+            const playerSize = CELL_SIZE - 4;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(
+                player.x * CELL_SIZE + CELL_SIZE / 2,
+                player.y * CELL_SIZE + CELL_SIZE / 2,
+                playerSize / 2,
+                0, Math.PI * 2
+            );
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(
+                playerImg,
+                player.x * CELL_SIZE + 2,
+                player.y * CELL_SIZE + 2,
+                playerSize,
+                playerSize
+            );
+            ctx.restore();
+
+            // Draw border around player
+            ctx.strokeStyle = '#ff1493';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(
+                player.x * CELL_SIZE + CELL_SIZE / 2,
+                player.y * CELL_SIZE + CELL_SIZE / 2,
+                playerSize / 2,
+                0, Math.PI * 2
+            );
+            ctx.stroke();
+        }
+
+        // Move player
+        function movePlayer(dx, dy) {
+            if (!gameActive) return;
+            
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            const level = levels[currentLevel];
+
+            // Check bounds and walls
+            if (newX >= 0 && newX < level.width && 
+                newY >= 0 && newY < level.height && 
+                maze[newY][newX] === 0) {
+                
+                player.x = newX;
+                player.y = newY;
+
+                // Check for heart collection
+                for (let i = hearts.length - 1; i >= 0; i--) {
+                    if (hearts[i].x === newX && hearts[i].y === newY) {
+                        hearts.splice(i, 1);
+                        heartsCollected++;
+                        totalHeartsCollected++;
+                        document.getElementById('heartsCollected').textContent = heartsCollected;
+                        
+                        // Play a little sound effect visual
+                        createHeartBurst(newX * CELL_SIZE, newY * CELL_SIZE);
+                    }
+                }
+
+                // Check for level completion
+                if (newX === level.width - 2 && newY === level.height - 2 && hearts.length === 0) {
+                    levelComplete();
+                }
+
+                draw();
+            }
+        }
+
+        // Create heart burst effect
+        function createHeartBurst(x, y) {
+            const burst = document.createElement('div');
+            burst.textContent = '💖';
+            burst.style.cssText = `
+                position: fixed;
+                left: ${canvas.getBoundingClientRect().left + x}px;
+                top: ${canvas.getBoundingClientRect().top + y}px;
+                font-size: 30px;
+                pointer-events: none;
+                animation: burst 0.5s ease-out forwards;
+                z-index: 1000;
+            `;
+            document.body.appendChild(burst);
+            setTimeout(() => burst.remove(), 500);
+        }
+
+        // Level complete
+        function levelComplete() {
+            gameActive = false;
+            clearInterval(timerInterval);
+
+            if (currentLevel < levels.length - 1) {
+                // Show transition screen
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('levelTransition').style.display = 'block';
+                document.getElementById('transitionTitle').textContent = 
+                    currentLevel === 0 ? 'Level 1 Complete! 🌸' : 'Level 2 Complete! 🌺';
+                document.getElementById('transitionText').textContent = 
+                    currentLevel === 0 ? 'Next up: Medium difficulty!' : 'Final challenge awaits!';
+            } else {
+                // Game won!
+                showVictory();
+            }
+        }
+
+        // Next level
+        function nextLevel() {
+            currentLevel++;
+            document.getElementById('levelTransition').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            initLevel();
+            gameActive = true;
+            timerInterval = setInterval(() => {
+                gameTimer++;
+                document.getElementById('timer').textContent = gameTimer;
+            }, 1000);
+        }
+
+        // Show victory screen - redirect to victory page
+        function showVictory() {
+            window.location.href = 'victory.html';
+        }
+
+        // Start game
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            currentLevel = 0;
+            gameTimer = 0;
+            totalHeartsCollected = 0;
+            initLevel();
+            gameActive = true;
+            timerInterval = setInterval(() => {
+                gameTimer++;
+                document.getElementById('timer').textContent = gameTimer;
+            }, 1000);
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    movePlayer(0, -1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    movePlayer(0, 1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    movePlayer(-1, 0);
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    movePlayer(1, 0);
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Add burst animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes burst {
+                0% { transform: scale(1); opacity: 1; }
+                100% { transform: scale(2) translateY(-30px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        createFloatingHearts();
+    </script>
+</body>
+</html>

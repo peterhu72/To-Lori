@@ -131,43 +131,46 @@
         }
 
         .btn-no {
-            background: linear-gradient(45deg, #ffb6c1, #ff69b4);
-            color: white;
-            box-shadow: 0 8px 25px rgba(255,182,193,0.4);
-            padding: 4px 10px !important;
-            font-size: 0.5rem !important;
+            background: #f0c4d0;
+            color: #b85c7a;
+            border: 2px solid #e8a8b8;
+            padding: 6px 14px !important;
+            font-size: 0.6rem !important;
             min-width: auto !important;
             min-height: auto !important;
+            border-radius: 20px;
+            font-weight: 600;
         }
 
         .btn {
-            padding: 20px 40px;
-            font-size: 1.5rem;
-            border: none;
-            border-radius: 50px;
+            padding: 16px 36px;
+            font-size: 1.25rem;
+            border: 2px solid rgba(0,0,0,0.06);
+            border-radius: 26px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
             position: relative;
-            overflow: hidden;
+            font-family: inherit;
         }
 
         .btn-yes {
-            background: linear-gradient(45deg, #ff69b4, #ff1493);
-            color: white;
-            box-shadow: 0 8px 25px rgba(255,105,180,0.4);
+            background: #e891a8;
+            color: #fff;
+            border-color: #d97a94;
+            box-shadow: 0 3px 10px rgba(200, 100, 130, 0.25);
         }
 
         .btn-yes:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 35px rgba(255,105,180,0.6);
+            background: #e07d98;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(200, 100, 130, 0.35);
         }
 
         .btn-no:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 35px rgba(255,182,193,0.6);
+            background: #e8b0c0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(200, 140, 160, 0.3);
         }
 
         .hearts {
@@ -374,9 +377,7 @@
             <div class="media-item">
                 <img src="D4053729-B742-406A-B196-2BF1902323B1.JPG" alt="Gorgeous Lori" onerror="this.src='https://via.placeholder.com/160x120/ff69b4/ffffff?text=Gorgeous+Lori'">
             </div>
-            <div class="media-item">
-                <img src="B6E4634A-DA7F-4EC5-ACE2-4371A972C688.JPG" alt="Lovely Lori" onerror="this.src='https://via.placeholder.com/190x130/ff69b4/ffffff?text=Lovely+Lori'">
-            </div>
+     
             <div class="media-item">
                 <img src="c5b84896be3f2686c01d9eeb86d27658.gif" alt="Cute GIF" onerror="this.src='https://via.placeholder.com/170x110/ff69b4/ffffff?text=Cute+GIF'">
             </div>
@@ -395,6 +396,11 @@
             <div class="buttons-container">
                 <button class="btn btn-yes" onclick="handleYes()">YES! 💕</button>
                 <button class="btn btn-no" onclick="handleNo()">No 💔</button>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 30px; border-top: 2px dashed #ffb6c1;">
+                <p style="color: #ff69b4; font-size: 1.1rem; margin-bottom: 15px;">~ A special Valentine's surprise awaits ~</p>
+                <a href="valentines.html" class="btn btn-yes" style="text-decoration: none; display: inline-block;">Play Valentine's Maze 💕</a>
             </div>
         </div>
     </div>
